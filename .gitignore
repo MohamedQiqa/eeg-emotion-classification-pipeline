@@ -1,0 +1,35 @@
+# ── Virtual environments ──────────────────────────────────
+ml_env/
+env/
+venv/
+.env/
+
+# ── Python cache & compiled files ─────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# ── Datasets & large files ────────────────────────────────
+dataset/
+*.mat
+*.zip
+*.tar.gz
+
+# ── Submission outputs ────────────────────────────────────
+submission.csv
+
+# ── Model artifacts (if saved locally) ────────────────────
+*.pkl
+*.npy
+
+# ── OS generated files ────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE settings ──────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
