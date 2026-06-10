@@ -1,7 +1,7 @@
 # Experiment Log — 340+ Experiments · 63 Submissions
 
 > **Competition**: Kaggle EEG Emotion/Neutral Classification  
-> **Final Result**: Public LB AUC = **0.557** · Rank **4th**  
+> **Final Result**: Public LB AUC = **0.557** · Rank **🥈 2nd**  
 > **Related docs**: [Pipeline Blueprint](./01_pipeline_blueprint.md) · [Window Evidence](./03_window_evidence.md)
 
 ---

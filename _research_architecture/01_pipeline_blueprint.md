@@ -1,7 +1,7 @@
 # EEG Sleep Emotion Classification — Pipeline Architecture
 
 > **Competition**: Kaggle EEG Emotion/Neutral Classification  
-> **Result**: Public LB AUC = **0.557** · Rank **4th**  
+> **Result**: Public LB AUC = **0.557** · Rank **🥈 2nd**  
 > **Evidence base**: 340+ LOSO experiments · 63 LB submissions  
 > **Related docs**: [Experiment Log](./02_experiment_log.md) · [Window Evidence](./03_window_evidence.md)
 

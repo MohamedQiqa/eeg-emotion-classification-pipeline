@@ -1,14 +1,24 @@
-# 🧠 EEG Emotion Classification — 4th Place Solution
+# 🧠 EEG Emotion Classification — 🥈 2nd Place Solution
 
-> **Competition**: Kaggle EEG Emotion/Neutral Classification  
-> **Public Leaderboard AUC**: **0.557** · **Rank**: 🏆 **4th Place**  
-> **Approach**: Classical ML — No deep learning required
+<div align="center">
+
+### 🏆 Kaggle EEG Emotion/Neutral Classification Competition
+
+# 🥈 2nd Place · AUC 0.557
+
+**Classical ML only — Zero deep learning**
+
+[![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python&logoColor=white)](#)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-LDA-orange?logo=scikit-learn&logoColor=white)](#)
+[![License](https://img.shields.io/badge/License-Apache_2.0-green)](#)
+
+</div>
 
 ---
 
 ## Overview
 
-This repository contains the **4th-place solution** for the Kaggle EEG Emotion/Neutral Classification Competition.
+This repository contains the **🥈 2nd-place solution** for the Kaggle EEG Emotion/Neutral Classification Competition.
 
 The pipeline classifies **emotional vs. neutral** memory reactivation states from 16-channel sleep-stage EEG recordings. Despite the extremely weak cross-subject signal (Cohen's d ≈ 0.02 — **10× weaker than "small"**), this approach achieves competitive performance using a **purely classical ML pipeline**:
 
@@ -24,7 +34,7 @@ All deep learning approaches tested (EEGNet, RNN, Transformers, EEGPT) failed to
 
 | Highlight | Details |
 |-----------|---------|
-| 🏆 **4th Place** | Among all competition participants |
+| 🥈 **2nd Place** | Among all competition participants |
 | 🧪 **340+ experiments** | Systematic exploration across 63 leaderboard submissions |
 | 🧬 **Science-backed window** | `[70:130]` (350–650 ms) confirmed by 5+ independent neuroscience studies |
 | 🎯 **Feature stability selection** | Only modification that improved both cross-validation and leaderboard simultaneously |
@@ -103,11 +113,15 @@ The pipeline will:
 
 ## 📊 Results
 
+<div align="center">
+
 | Metric | Score |
 |--------|-------|
 | **LOSO Cross-Validation AUC** | 0.534 |
 | **Public Leaderboard AUC** | **0.557** |
-| **Competition Rank** | **4th Place** |
+| **Competition Rank** | **🥈 2nd Place** |
+
+</div>
 
 ---
 

@@ -1,6 +1,6 @@
 # 🧠 Model Card — EEG Emotion Classifier
 
-> **Algorithm**: Shrinkage LDA · **AUC**: 0.557 (Public LB) · **Rank**: 4th Place  
+> **Algorithm**: Shrinkage LDA · **AUC**: 0.557 (Public LB) · **Rank**: 🥈 2nd Place  
 > **Task**: Binary classification — Emotional vs. Neutral memory reactivation from sleep EEG  
 > **Related docs**: [Pipeline Blueprint](_research_architecture/01_pipeline_blueprint.md) · [Experiment Log](_research_architecture/02_experiment_log.md) · [Window Evidence](_research_architecture/03_window_evidence.md)
 
@@ -10,7 +10,7 @@
 
 This model classifies **emotional vs. neutral** states from 16-channel sleep-stage EEG recordings. It uses a **Linear Discriminant Analysis (LDA)** classifier with Ledoit-Wolf automatic shrinkage, trained on covariance-based features extracted from the **theta frequency band (4–8 Hz)**.
 
-The model achieves a **public leaderboard AUC of 0.557**, placing **4th** in the Kaggle EEG Emotion/Neutral classification competition — using a purely classical ML approach with **zero deep learning**.
+The model achieves a **public leaderboard AUC of 0.557**, placing **🥈 2nd** in the Kaggle EEG Emotion/Neutral classification competition — using a purely classical ML approach with **zero deep learning**.
 
 ### Why This Approach Works
 
@@ -191,7 +191,7 @@ No demographic information (age, gender, ethnicity) was provided or used. Subjec
 |--------|-------|
 | LOSO Cross-Validation AUC | ~0.534 |
 | Public Leaderboard AUC | **0.557** |
-| Competition Rank | **4th** |
+| Competition Rank | **🥈 2nd** |
 
 The model was evaluated using **Leave-One-Subject-Out (LOSO)** cross-validation — each subject is held out as the test set while all remaining subjects are used for training. This is the gold standard for assessing EEG cross-subject generalization.
 
