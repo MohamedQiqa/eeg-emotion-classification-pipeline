@@ -3,7 +3,7 @@
 > **Competition**: Kaggle EEG Emotion/Neutral Classification  
 > **Result**: Public LB AUC = **0.557** · Rank **🥈 2nd**  
 > **Evidence base**: 340+ LOSO experiments · 63 LB submissions  
-> **Related docs**: [Experiment Log](./02_experiment_log.md) · [Window Evidence](./03_window_evidence.md)
+> **Related docs**: [Scientific Papers & Citations](./01_scientific_papers_and_citations.md) · [Experiments & Benchmarks](./03_experiments_and_benchmarks.md)
 
 ---
 
@@ -37,7 +37,7 @@ The cross-subject emotional signal is among the weakest in EEG research:
 | Cross-subject (what we classify) | **0.02 – 0.06** | Tiny (0.2 = "small") |
 | Within-subject | 0.3 – 0.5 | 5–7× stronger, but **flips direction** across subjects |
 
-![Cross-subject signal](./cross.png)
+![Cross-subject signal](./figures/cross_subject_signal.png)
 
 ### 2.2 · Signal Direction Reversal (Fundamental Problem)
 
@@ -48,7 +48,7 @@ The within-subject signal is stronger but its **direction reverses** across indi
 | **A** | emo > neu | S0, S2, S3, S4, S6, S7, S8, S10 | 8 |
 | **B** | emo < neu | S1, S5, S9, S11, S12, S13 | 6 |
 
-![Within-subject signal reversal](./Within.png)
+![Within-subject signal reversal](./figures/within_subject_signal.png)
 
 A global model averages these opposing patterns → performance collapses toward chance. There is no reliable way to detect which group a new subject belongs to without labels.
 
@@ -76,7 +76,7 @@ A global model averages these opposing patterns → performance collapses toward
 | `[80:120]` | 400–600 | 0.5264 | — | Best LOSO but LB worse |
 | `[50:150]` | 250–750 | 0.5151 | — | Wider = more noise |
 
-This window is backed by **5+ independent neuroscience studies**. See [Window Evidence](./03_window_evidence.md).
+This window is backed by **5+ independent neuroscience studies**. See [Scientific Papers & Citations](./01_scientific_papers_and_citations.md).
 
 ---
 

@@ -8,14 +8,14 @@ import os
 # ============================================================
 # PATHS
 # ============================================================
-# Base directory: this file's directory (pipeline_folder)
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+# Base directory: project root (pipeline_folder)
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 TRAIN_PATH = os.path.join(BASE_DIR, 'dataset', 'training')
 TEST_PATH  = os.path.join(BASE_DIR, 'dataset', 'testing')
 
 # Output paths (relative to pipeline_folder)
-PIPELINE_DIR  = os.path.dirname(__file__)
-REPORTS_DIR   = os.path.join(PIPELINE_DIR, 'Reports')
+PIPELINE_DIR    = BASE_DIR
+REPORTS_DIR     = os.path.join(PIPELINE_DIR, 'reports')
 SUBMISSION_PATH = os.path.join(PIPELINE_DIR, 'submission.csv')
 
 # ============================================================

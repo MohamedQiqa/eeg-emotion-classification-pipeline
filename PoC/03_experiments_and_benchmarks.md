@@ -2,7 +2,7 @@
 
 > **Competition**: Kaggle EEG Emotion/Neutral Classification  
 > **Final Result**: Public LB AUC = **0.557** · Rank **🥈 2nd**  
-> **Related docs**: [Pipeline Blueprint](./01_pipeline_blueprint.md) · [Window Evidence](./03_window_evidence.md)
+> **Related docs**: [Scientific Papers & Citations](./01_scientific_papers_and_citations.md) · [Pipeline Blueprint](./02_pipeline_blueprint.md)
 
 ---
 
@@ -69,7 +69,7 @@ The covariance window was systematically optimized. Wider windows dilute the sig
 
 > **Pattern**: Wider → monotonic decline. The narrowest windows have best LOSO but anti-correlate with LB.
 
-> **Why `[70:130]`?** This window is not arbitrary — it captures the peak TMR reactivation response confirmed by 5+ independent neuroscience studies. See [Window Evidence](./03_window_evidence.md).
+> **Why `[70:130]`?** This window is not arbitrary — it captures the peak TMR reactivation response confirmed by 5+ independent neuroscience studies. See [Scientific Papers & Citations](./01_scientific_papers_and_citations.md).
 
 ---
 

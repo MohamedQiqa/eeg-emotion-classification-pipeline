@@ -2,7 +2,7 @@
 
 > **Claim**: The covariance window `[70:130]` (350–650 ms post-cue at 200 Hz) captures the peak memory reactivation response.  
 > **Verdict**: This is a **biological property of the brain**, not a dataset-specific artifact — confirmed by **5+ independent sources** across multiple labs, tasks, and years.  
-> **Related docs**: [Pipeline Blueprint](./01_pipeline_blueprint.md) · [Experiment Log](./02_experiment_log.md)
+> **Related docs**: [Pipeline Blueprint](./02_pipeline_blueprint.md) · [Experiments & Benchmarks](./03_experiments_and_benchmarks.md)
 
 ---
 
@@ -33,7 +33,7 @@ Using all 200 timepoints dilutes the signal:
 
 **What this proves**: The brain's TMR response has a **theta increase** and a critical **ERP shift at exactly 500 ms** — right in the center of our window. The sigma/spindle activity starts at ~1000 ms, **outside** our window — confirming we isolate reactivation, not consolidation.
 
-![Instructor Paper — Section 3.1 and Figure 2](./Window_papers/01_instructor_IMAG_fig2.png)
+![Instructor Paper — Section 3.1 and Figure 2](./figures/01_instructor_imag_fig2.png)
 
 ---
 
@@ -47,7 +47,7 @@ Using all 200 timepoints dilutes the signal:
 
 **What this proves**: This is the **instructor's own emotional TMR paper** (likely the basis for this competition). Peak classification occurs at **400–600 ms** — precisely what `[70:130]` (350–650 ms) covers.
 
-![BioRxiv Abstract — 0.4–0.6 seconds](./Window_papers/02_biorxiv_abstract.png)
+![BioRxiv Abstract — 0.4–0.6 seconds](./figures/02_biorxiv_abstract.png)
 
 ---
 
@@ -64,7 +64,7 @@ Using all 200 timepoints dilutes the signal:
 
 **What this proves**: The AUC plot **visually shows the peak** between 0.4–0.6 s. Before 0.4 s and after 0.6 s, AUC drops toward chance level (0.5). This is **empirical proof** that using all timepoints includes noise that dilutes the signal.
 
-![BioRxiv Results — Figure 2 with 0.4–0.6 s green highlight](./Window_papers/03_biorxiv_results_figure2.png)
+![BioRxiv Results — Figure 2 with 0.4–0.6 s green highlight](./figures/03_biorxiv_results_figure2.png)
 
 ---
 
@@ -79,7 +79,7 @@ Using all 200 timepoints dilutes the signal:
 
 **What this proves**: An **independent lab** (Belal / Cairney group, University of York) performing TMR classification on a **different dataset** and **different task** also found that the classification-relevant signal is in the **first 400 ms post-cue**. They restricted their analysis to the early window, exactly as we do.
 
-![Belal 2018 — 400 ms classification window](./Window_papers/04_belal_2018_400ms.png)
+![Belal 2018 — 400 ms classification window](./figures/04_belal_2018_400ms.png)
 
 ---
 
@@ -98,7 +98,7 @@ Additional references confirm this timing:
 
 **What this proves**: A **third independent lab** (University of Freiburg / Zurich) studying vocabulary TMR found theta increases in the **500–900 ms** window — overlapping with our `[70:130]` (350–650 ms).
 
-![Schreiner & Rasch 2015 — 700–900 ms theta power](./Window_papers/05_schreiner_700_900ms.png)
+![Schreiner & Rasch 2015 — 700–900 ms theta power](./figures/05_schreiner_700_900ms.png)
 
 ---
 
@@ -116,7 +116,7 @@ Key findings from across the literature:
 
 **What this proves**: Across **all** TMR studies from multiple independent labs and tasks, theta increases are consistently observed between 350–1000 ms post-cue. Our window `[70:130]` (350–650 ms) captures the **onset** of this theta response — the most discriminative part — before it mixes with sigma/spindle consolidation activity.
 
-![Google Overview — Multiple Studies Confirm Theta Timing](./Window_papers/06_google_overview_theta.png)
+![Google Overview — Multiple Studies Confirm Theta Timing](./figures/06_google_overview_theta.png)
 
 ---
 

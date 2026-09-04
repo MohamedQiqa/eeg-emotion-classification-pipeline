@@ -1,25 +1,42 @@
 # 🧠 Model Card — EEG Emotion Classifier
 
-> **Algorithm**: Shrinkage LDA · **AUC**: 0.557 (Public LB) · **Rank**: 🥈 2nd Place  
+> **Algorithm**: Shrinkage LDA (Ledoit-Wolf) · **Public LB AUC**: 0.557 ·
 > **Task**: Binary classification — Emotional vs. Neutral memory reactivation from sleep EEG  
-> **Related docs**: [Pipeline Blueprint](_research_architecture/01_pipeline_blueprint.md) · [Experiment Log](_research_architecture/02_experiment_log.md) · [Window Evidence](_research_architecture/03_window_evidence.md)
+> **Author**: Mohamed Samy  
+> **Non-Technical Story**: [What If We Could Listen to the Brain While We Sleep? (Medium)](https://medium.com/@mohamed42468/what-if-we-could-listen-to-the-brain-while-we-sleep-a76594b33696?postPublishedType=initial)  
+> **PoC & Evidence**: [Scientific Papers & Citations](PoC/01_scientific_papers_and_citations.md) · [Pipeline Blueprint](PoC/02_pipeline_blueprint.md) · [Experiments & Benchmarks](PoC/03_experiments_and_benchmarks.md)
+
+---
+
+## ⚡ The Challenge: Listening to a Whisper in a Stadium
+
+Imagine someone is asleep in a quiet room. Their eyes are closed, their body is completely still, and from the outside, nothing seems to be happening. 
+
+Inside the skull, however, the brain is constantly talking. Millions of neurons fire synchronised electrical signals measured in microvolts. During wakefulness, the subject heard a specific sound paired with an emotional memory. Now, in deep non-REM sleep, we play that same sound again—using **Targeted Memory Reactivation (TMR)** like a small key to reactivate the memory while they sleep.
+
+**The machine learning question**: *Can an algorithm look at 16 scalp electrodes and detect the footprint of that emotional memory?*
+
+The core engineering hurdle is signal-to-noise ratio:
+- **The "Crowded Room" Problem**: EEG sensors don’t record a single neuron; they record the entire stadium. Baseline sleep rhythms, eye movements, and muscle twitches reach $\sim 50\text{–}100\,\mu\text{V}$, while the cognitive emotional signal is a microscopic $\sim 0.5\,\mu\text{V}$.
+- **Effect Size ($d \approx 0.02$)**: The cross-subject emotional signal has a Cohen's $d$ of 0.02–0.06—**10× weaker than what statisticians consider "small"**. 
+- **The Deep Learning Trap**: When signal is this faint, complex neural architectures (EEGNet, CNNs, Transformers, EEGPT) easily memorize physiological noise and collapse to chance level.
+
+**The winning strategy**: We avoided deep learning entirely. Guided by neuroscience literature and 340+ systematic validation experiments, we isolated the **theta rhythm (4–8 Hz)**, zeroed in on the **peak reactivation window (350–650 ms)**, extracted **spatial covariance matrices**, and applied **stability-based feature selection (136 → 75 features)** with regularized **Linear Discriminant Analysis (LDA)**. 
+
+This classical pipeline achieved an AUC of **0.557**, securing **🥈 2nd Place** on the Kaggle competition leaderboard.
 
 ---
 
 ## 1 · Model Summary
 
-This model classifies **emotional vs. neutral** states from 16-channel sleep-stage EEG recordings. It uses a **Linear Discriminant Analysis (LDA)** classifier with Ledoit-Wolf automatic shrinkage, trained on covariance-based features extracted from the **theta frequency band (4–8 Hz)**.
+This model classifies **emotional vs. neutral** states from 16-channel sleep-stage EEG recordings. It uses a **Linear Discriminant Analysis (LDA)** classifier with Ledoit-Wolf automatic shrinkage, trained on covariance-based spatial features extracted from the **theta frequency band (4–8 Hz)**.
 
-The model achieves a **public leaderboard AUC of 0.557**, placing **🥈 2nd** in the Kaggle EEG Emotion/Neutral classification competition — using a purely classical ML approach with **zero deep learning**.
+### Core Pillars of the Solution
 
-### Why This Approach Works
-
-The cross-subject emotional signal in sleep EEG is extraordinarily weak (Cohen's d ≈ 0.02–0.06 — **10× weaker than "small"**). All deep learning architectures tested (EEGNet, RNNs, Transformers, EEGPT) failed to learn useful representations at this signal strength. The winning strategy was:
-
-1. **Isolate the right signal** — theta band only (4–8 Hz)
-2. **Focus on the right window** — 350–650 ms post-cue (peak memory reactivation)
-3. **Use the right representation** — spatial covariance captures channel synchrony
-4. **Remove noise, don't add features** — stability-based selection from 136 → 75 features
+1. **Isolate the Biological Carrier** — Theta band only (4–8 Hz). All other bands (Alpha, Beta, Delta, Gamma, Spindles) added pure noise.
+2. **Focus on the Reinstatement Window** — 350–650 ms post-cue (`[70:130]` samples at 200 Hz), capturing peak reactivation before consolidation spindles begin.
+3. **Represent Spatial Synchrony** — Channel covariance captures inter-electrode coordination. Signal-level z-scoring mathematically makes covariance equal to correlation.
+4. **Remove Noise, Don't Add Features** — Stability-based feature selection reduces 136 covariance pairs to the top 75 most reliable features across subjects.
 
 ---
 
@@ -40,219 +57,189 @@ The cross-subject emotional signal in sleep EEG is extraordinarily weak (Cohen's
   submission.csv
 ```
 
+### Signal Preprocessing & Brain Connectivity
+
+![Signal Preprocessing](reports/02_signal_preprocessing.png)
+*Figure 1: Raw EEG trace vs. 4th-order Butterworth bandpass (4–8 Hz) and per-subject z-score normalization.*
+
+![Mean Covariance](reports/03_mean_covariance.png)
+*Figure 2: Average 16×16 spatial covariance patterns across all channels for Emotional vs. Neutral trials.*
+
 ---
 
-## 3 · Usage
+## 3 · Quickstart & Usage
+
+### Reproducing the Complete Pipeline
+
+To run the entire pipeline end-to-end (data loading, preprocessing, LOSO cross-validation, training the final model, generating all diagnostic figures in `reports/`, and exporting `submission.csv`):
+
+```bash
+ml_env\Scripts\python.exe src/pipeline.py
+```
+
+### Standalone Inference Snippet
 
 ```python
-import numpy as np, joblib
+import numpy as np
+import joblib
 from scipy.signal import butter, filtfilt
 
-# Load model artifacts
+# 1. Load model artifacts
 lda_model = joblib.load('lda_model.pkl')
-best_mask = np.load('best_mask.npy')
+best_mask = np.load('best_mask.npy')  # Boolean array of length 136 (75 True)
 
-# Bandpass filter helper (theta: 4-8 Hz)
-def bandpass(data, lo, hi, fs=200, order=4):
-    b, a = butter(order, [lo/(0.5*fs), hi/(0.5*fs)], btype='band')
+# 2. Bandpass filter helper (theta: 4-8 Hz)
+def bandpass(data, lo=4, hi=8, fs=200, order=4):
+    b, a = butter(order, [lo / (0.5 * fs), hi / (0.5 * fs)], btype='band')
     return filtfilt(b, a, data, axis=-1)
 
-# Input: raw EEG array of shape (n_trials, 16, n_timepoints) at 200 Hz
-# 1. Bandpass filter to theta (4-8 Hz)
-# 2. Z-score normalize per subject
-# 3. Extract covariance features from window [70:130] (350-650ms)
-# 4. Z-score covariance features per subject
-# 5. Apply best_mask to select 75 features
-# 6. Predict
+# Input shape: (n_trials, 16, 200) raw EEG at 200 Hz
+# Step A: Bandpass filter
+filtered = bandpass(raw_eeg)
 
-predictions = lda_model.predict_proba(selected_features)[:, 1]
-# Output: probability scores (0 to 1), higher = emotional
+# Step B: Signal-level z-score (per subject across trials)
+filt_z = (filtered - filtered.mean(axis=(0, 2), keepdims=True)) / filtered.std(axis=(0, 2), keepdims=True)
+
+# Step C: Extract covariance from [70:130] window (350-650 ms)
+window_data = filt_z[:, :, 70:130]
+covs = np.einsum('ijk,ilk->ijl', window_data, window_data) / 60.0
+
+# Step D: Extract upper-triangle features (136 features)
+triu_idx = np.triu_indices(16)
+feats = covs[:, triu_idx[0], triu_idx[1]]
+
+# Step E: Feature-level z-score & stability mask selection (75 features)
+feats_z = (feats - feats.mean(axis=0)) / (feats.std(axis=0) + 1e-8)
+feats_sel = feats_z[:, best_mask]
+
+# Step F: Predict emotional probability
+probabilities = lda_model.predict_proba(feats_sel)[:, 1]
 ```
 
 | Property | Value |
-|----------|-------|
+|---|---|
 | **Input shape** | `(n_trials, 16, n_timepoints)` — 16 EEG channels at 200 Hz |
 | **Output shape** | `(n_trials,)` — probability scores between 0 (neutral) and 1 (emotional) |
 
-> **⚠️ Known limitation:** The model expects the exact same preprocessing pipeline (theta bandpass → z-score → covariance → feature masking). Feeding raw or differently preprocessed EEG data will produce meaningless results.
+> [!WARNING]
+> **Strict Pipeline Dependency**: The model requires the exact preprocessing sequence (Theta Butterworth $\to$ Signal Z-score $\to$ Covariance $\to$ Feature Z-score $\to$ Masking). Feeding raw EEG or different filter bands will result in chance predictions.
 
 ---
 
-## 4 · System Requirements
+## 4 · System Requirements & Compute
 
 ### Runtime Dependencies
+- **Python**: 3.8+
+- **Core packages**: `numpy`, `scipy`, `scikit-learn`, `h5py`, `pandas`, `matplotlib`
+- **Input format**: HDF5 `.mat` files (16 channels @ 200 Hz)
 
-This is a **standalone model** — no external APIs or downstream services required.
-
-| Requirement | Details |
-|-------------|---------|
-| **Python** | 3.8+ |
-| **Core packages** | NumPy, SciPy, scikit-learn, h5py, pandas |
-| **Input format** | Raw EEG in `.mat` (HDF5), 16 channels @ 200 Hz |
-| **Minimum segment** | 0–1000 ms post-stimulus (model uses the 350–650 ms window) |
-
-### Compute Requirements
-
-| Metric | Value |
-|--------|-------|
-| Training time | ~60 seconds on a single CPU core |
-| Inference time | <1 second per subject (~40 trials) |
-| Memory | ~500 MB RAM |
-| GPU/TPU | **Not required** |
+### Hardware Footprint
+| Metric | Benchmark Value |
+|---|---|
+| **Training Time** | ~60 seconds on a single CPU core |
+| **Inference Latency** | <10 ms per subject (~40 trials) |
+| **Memory Usage** | <500 MB RAM |
+| **GPU / Accelerators** | **Not required** (pure CPU execution) |
 
 ---
 
-## 5 · Model Characteristics
+## 5 · Model Architecture & Feature Stability
 
-### Architecture
+| Property | Specification |
+|---|---|
+| **Algorithm** | Linear Discriminant Analysis (LDA) |
+| **Solver** | `lsqr` with automatic Ledoit-Wolf shrinkage |
+| **Raw Covariance Features** | 136 (upper triangle of 16×16 channel matrix) |
+| **Selected Features** | 75 (selected via stability metric) |
+| **Artifact Sizes** | Model: ~47 KB (`lda_model.pkl`) · Mask: <1 KB (`best_mask.npy`) |
 
-| Property | Value |
-|----------|-------|
-| Algorithm | Linear Discriminant Analysis (LDA) |
-| Solver | `lsqr` with automatic Ledoit-Wolf shrinkage |
-| Total input features | 136 (upper triangle of 16×16 covariance matrix) |
-| Selected features | 75 (after stability-based feature selection) |
-| Model file size | ~47 KB (`lda_model.pkl`) |
-| Feature mask size | <1 KB (`best_mask.npy`) |
-| Number of layers | 1 (linear classifier) |
-| Inference latency | <10 ms per subject |
+### Combined Stability Score
 
-### Training Details
+To prevent overfitting on noisy features, we scored each of the 136 covariance pairs across all 14 Leave-One-Subject-Out folds:
 
-- **Trained from scratch** — no pre-trained weights or transfer learning
-- **Not pruned** and **not quantized** — simple linear classifier with minimal parameters
-- **No differential privacy** techniques applied
-- **Regularization**: Automatic Ledoit-Wolf shrinkage on the within-class covariance estimate
-
-### Feature Selection — Combined Stability Score
-
-The key innovation is a **stability-based feature selection** method that was the **only modification to improve both LOSO and LB simultaneously**:
-
-```
-score = sign_agreement × mean_abs_coef / (coef_variation + ε)
-```
+$$\text{Stability Score} = \text{Sign Agreement} \times \frac{\text{Mean } |\text{Coefficient}|}{\text{Coefficient of Variation} + \varepsilon}$$
 
 | Component | What It Measures |
-|-----------|-----------------|
-| **Sign agreement** | Do all LOSO folds agree on the feature's direction? |
-| **Mean abs coefficient** | How much does LDA rely on this feature? |
-| **Coefficient of variation** | How much does the weight fluctuate across folds? |
+|---|---|
+| **Sign Agreement** | Did all LOSO folds agree on whether this channel pair correlates with emotionality? |
+| **Mean Absolute Coef** | How heavily does LDA weight this channel pair? |
+| **Coefficient of Variation** | How stable is the weight across different subjects? |
 
-Top K=75 features are kept; 61 unstable features are removed. Full details in the [Pipeline Blueprint](_research_architecture/01_pipeline_blueprint.md#step-8--feature-selection--combined-stability-score).
+![Feature Stability Scores](reports/05_feature_stability_scores.png)
+*Figure 3: Feature stability scores sorted across all 136 covariance pairs. Top K=75 features are retained; 61 unstable pairs are discarded.*
 
 ---
 
-## 6 · Data Overview
+## 6 · Data Overview & The "Polarity Reversal" Trap
 
-### Training Data
+### Dataset Breakdown
+- **Source**: Kaggle Competition dataset (HDF5 `.mat` format).
+- **Setup**: 14 training subjects performing emotional vs. neutral memory reactivation during sleep.
+- **Total trials**: 10,209 trials (5,038 emotional + 5,171 neutral).
+- **Test set**: 3 unseen subjects (zero-shot evaluation).
 
-The training data consists of sleep-stage EEG recordings from **14 subjects** performing an emotional vs. neutral Targeted Memory Reactivation (TMR) task.
+### The Within-Subject Polarity Trap
 
-| Property | Value |
-|----------|-------|
-| **Source** | Kaggle competition (HDF5 `.mat` format) |
-| **Channels** | 16 EEG channels at 200 Hz |
-| **Total trials** | 10,209 (5,038 emotional + 5,171 neutral) |
-| **Subjects** | 14 (training) + 3 (test, unseen) |
+One of the most dangerous traps in this dataset was the **within-subject signal direction reversal**:
+- Within a single subject, the difference between emotional and neutral is relatively strong ($d \approx 0.3–0.5$).
+- However, **the polarity reverses across individuals**:
+  - **Group A (8 subjects)**: Emotional amplitude > Neutral amplitude.
+  - **Group B (6 subjects)**: Emotional amplitude < Neutral amplitude.
 
-### Pre-Processing Pipeline
-
-| Step | Operation | Purpose |
-|------|-----------|---------|
-| 1 | Temporal cropping (t ≥ 0) | Retain post-stimulus data only |
-| 2 | 4th-order Butterworth (4–8 Hz) | Isolate theta band |
-| 3 | Per-subject z-score (signals) | Make covariance ≈ correlation |
-| 4 | Covariance over `[70:130]` window | Capture channel synchrony in reactivation window |
-| 5 | Upper triangle extraction | 136 features (symmetric matrix → no redundancy) |
-| 6 | Stability-based selection | Top 75 features |
-| 7 | Per-subject z-score (features) | Scale features for LDA |
-
-### Data Splits
-
-| Split | Details |
-|-------|---------|
-| **Training** | All subjects from competition training set (`sleep_neu` + `sleep_emo`) |
-| **Validation** | Leave-One-Subject-Out (LOSO) across all 14 training subjects |
-| **Test** | 3 held-out subjects provided by competition organizers (labels unavailable) |
-
-> **No data leakage**: Z-score normalization is computed **independently per subject**. Feature selection is performed on training data only.
-
-### Demographics
-
-No demographic information (age, gender, ethnicity) was provided or used. Subject identifiers are anonymized numerical IDs.
+A naive global model averages these opposing directions and cancels out to 50% chance. Our pipeline overcomes this through **per-subject signal-level and feature-level z-scoring**, aligning relative channel correlations rather than raw amplitudes.
 
 ---
 
 ## 7 · Evaluation Results
 
-### Performance Summary
+### Cross-Validation & Competition Leaderboard
 
-| Metric | Score |
-|--------|-------|
-| LOSO Cross-Validation AUC | ~0.534 |
-| Public Leaderboard AUC | **0.557** |
-| Competition Rank | **🥈 2nd** |
+The model was evaluated using **Leave-One-Subject-Out (LOSO)** cross-validation across all 14 training subjects. Each fold holds out an entire individual to guarantee zero cross-subject data leakage:
 
-The model was evaluated using **Leave-One-Subject-Out (LOSO)** cross-validation — each subject is held out as the test set while all remaining subjects are used for training. This is the gold standard for assessing EEG cross-subject generalization.
+| Metric | Score | Notes |
+|---|---|---|
+| **LOSO Cross-Validation AUC** | **0.5335** | Evaluated on full unseen subjects |
+| **Public Leaderboard AUC** | **0.557** | Evaluated on 3 held-out competition test subjects |
+| **Final Competition Rank** | **🥈 2nd Place** | Classical ML outperforming all deep learning entries |
 
-### Per-Subject Variability
+![LOSO Per-Subject Performance](reports/04_loso_per_subject.png)
+*Figure 4: Leave-One-Subject-Out (LOSO) AUC across each of the 14 individual subjects.*
 
-Per-subject AUC scores vary across individuals due to **high inter-subject variability** in neural signatures. Some subjects are inherently easier to classify based on:
+![Validation Confusion Matrix](reports/06_confusion_matrix.png)
+*Figure 5: Out-of-fold validation confusion matrix across all 10,209 trials.*
 
-- Strength of their theta-band emotional response
-- Whether they belong to the "emo > neu" or "emo < neu" group (signal direction reversal)
+### The LOSO–Leaderboard Anti-Correlation Discovery
 
-### LOSO–Leaderboard Anti-Correlation
+During experimentation, we discovered a counter-intuitive phenomenon: **6 out of 7 modifications that increased LOSO cross-validation actually decreased the public leaderboard score**. 
 
-> ⚠️ **Important**: LOSO improvements **anti-correlate** with leaderboard performance in 6 out of 7 tested modifications. Only **feature removal** (K=136 → K=75) broke this pattern and improved both simultaneously.
-
-This is documented in detail in the [Experiment Log](_research_architecture/02_experiment_log.md#7--the-loso-anti-correlation-problem).
-
----
-
-## 8 · Classifier Comparison
-
-### What Works
-
-All linear classifiers perform **equivalently** — regularization matters, algorithm choice does not:
-
-| Classifier | LOSO AUC | LB Score |
-|------------|----------|----------|
-| **Shrinkage LDA (auto) ★** | **0.5335** | **0.557** |
-| Logistic Regression | 0.537 | 0.555 |
-| Ridge Classifier | 0.537 | 0.555 |
-| Linear SVM | 0.537 | 0.555 |
-
-### What Failed
-
-| Classifier | Why |
-|------------|-----|
-| Random Forest / XGBoost / LightGBM | Tree models memorize training subjects on d ≈ 0.02 signal |
-| EEGNet / CNN / RNN / Transformers | Signal too weak for neural architectures |
-| DANN / EEGPT / SupCon | Neural components contributed nothing |
-| KNN / Gaussian NB | Poor performance in high-dimensional covariance space |
-
-Full analysis of 340+ experiments in the [Experiment Log](_research_architecture/02_experiment_log.md).
+The only modification that improved **both LOSO and Leaderboard simultaneously** was **feature pruning via the Stability Score (K=136 → K=75)**. Removing noise was the only genuine path to generalizable learning.
 
 ---
 
-## 9 · Limitations & Ethics
+## 8 · Benchmark: Classical ML vs. Deep Learning
 
-### Usage Limitations
+Across 340+ systematic experiments, all linear regularized classifiers performed near parity, whereas complex non-linear models failed:
 
-| Limitation | Detail |
-|------------|--------|
-| **Domain-specific** | Trained exclusively on sleep-stage EEG data — not valid for motor imagery, P300, or other EEG paradigms |
-| **Hardware-specific** | Requires 16-channel EEG at 200 Hz — different setups need pipeline modification |
-| **Not for clinical use** | Developed for a research competition, not validated for diagnostics |
+| Model Architecture | Validation AUC | Public LB | Why It Succeeded or Failed |
+|---|---|---|---|
+| **Shrinkage LDA (auto) ★** | **0.5335** | **0.557** | **Optimal covariance regularization; closed-form solution.** |
+| Logistic Regression ($L_2$) | 0.5370 | 0.555 | Linear boundary performs similarly with proper penalty. |
+| Ridge Classifier | 0.5370 | 0.555 | Closed-form linear model; robust to collinearity. |
+| Linear SVM ($C=0.01$) | 0.5370 | 0.555 | Maximizes margin on regularized features. |
+| Random Forest / XGBoost | ~0.505 | 0.510 | Memorizes noise and subject quirks at $d \approx 0.02$. |
+| EEGNet / 1D-CNN | ~0.502 | 0.508 | Convolutional kernels overfit to individual subjects. |
+| BiLSTM / Transformers | ~0.498 | 0.501 | Data volume insufficient for temporal attention at this SNR. |
+| EEGPT / Foundation Models | ~0.501 | 0.503 | Pre-trained representations do not transfer to weak sleep TMR. |
 
-### Fairness
+---
 
-Fairness analysis was not formally conducted as no demographic attributes were available. The model treats all subjects equally through **per-subject normalization**, which mitigates individual differences in EEG signal amplitude and baseline activity.
+## 9 · Limitations & Ethical Considerations
 
-### Ethical Considerations
+### Scope & Constraints
+- **Paradigm Specificity**: Trained specifically on Targeted Memory Reactivation during sleep. It does not generalize to active awake tasks, motor imagery, or P300 paradigms.
+- **Electrode Configuration**: Calibrated for standard 16-channel EEG @ 200 Hz. Re-montaging or different electrode positions require retraining the covariance feature mask.
+- **Research Scope**: Developed as an academic competition solution; not certified or intended for clinical diagnostics or medical sleep staging.
 
-- Training data was provided by competition organizers under their data use agreement
-- No personally identifiable information is contained in the model weights
-- **Must not** be used for emotion surveillance, deception detection, or any application infringing on individual privacy or autonomy
-- EEG-based emotion classification has known limitations in reliability and generalizability — results should be interpreted with appropriate scientific caution
+### Ethical Safeguards
+- **Privacy & Demographics**: The training data contains zero demographic identifiers (age, gender, ethnicity) and no personally identifiable information (PII).
+- **Prohibited Uses**: This model must **never** be deployed for clandestine emotion surveillance, cognitive monitoring, deception detection, or any application compromising individual mental privacy or autonomy.

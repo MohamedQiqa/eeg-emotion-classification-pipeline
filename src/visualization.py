@@ -1,6 +1,6 @@
 """
 visualization.py — All plots for the EEG pipeline.
-Saved to Reports/ directory. No display needed (headless).
+Saved to reports/ directory. No display needed (headless).
 
 Pipeline plots  (run automatically via save_all_plots):
   01  How many neutral vs emotional trials each subject has
@@ -323,7 +323,7 @@ def plot_score_heatmap(combined_score):
 def save_all_plots(X_raw, filt_z, y_all, bounds, filenames,
                    loso_preds, per_subj_auc, global_auc,
                    combined_score, best_mask, submission_df):
-    """Run all 8 pipeline plots and save to Reports/."""
+    """Run all 8 pipeline plots and save to reports/."""
     print(f"\nSaving plots to: {config.REPORTS_DIR}")
     paths = [
         plot_label_distribution(y_all, bounds, filenames),
@@ -540,7 +540,7 @@ def plot_band_power_summary(X_raw, y_all):
 
 def save_eda_plots(X_raw, y_all, skip_slow=False):
     """
-    Run all EDA plots and save to Reports/.
+    Run all EDA plots and save to reports/.
     skip_slow=True  → only eda_01 and eda_02  (fast, < 5s)
     skip_slow=False → all 4 including PSD and band power (~2-3 min extra)
     """
