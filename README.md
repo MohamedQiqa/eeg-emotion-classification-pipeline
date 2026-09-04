@@ -23,9 +23,10 @@
 
 ## 🗺️ Quick Navigation
 
-Start here depending on what you're looking for:
+Start here depending on your background and goals:
 
-- 🧠 **[Model Card (Technical Deep Dive)](model_card.md)**: The complete technical narrative — starts with an engaging hook (*"Listening to a Whisper in a Stadium"*), embeds real diagnostic figures, breaks down the within-subject polarity reversal, and provides the full Python inference code.
+- 📖 **[Non-Technical Story (Medium)](https://medium.com/@mohamed42468/what-if-we-could-listen-to-the-brain-while-we-sleep-a76594b33696?postPublishedType=initial)**: *Recommended for non-technical readers & newcomers* — A friendly, story-driven explanation of how we listen to the sleeping brain, what Targeted Memory Reactivation (TMR) is, and why decoding brainwaves during sleep is so fascinating.
+- 🧠 **[Model Card (Technical Deep Dive)](model_card.md)**: *Recommended for engineers & data scientists* — The complete technical narrative opening with *"Listening to a Whisper in a Stadium"*, embedded diagnostic figures, within-subject polarity reversals, and full Python inference code.
 - 🔬 **[Proof of Concept (PoC/)](PoC/)**:
   - [01_scientific_papers_and_citations.md](PoC/01_scientific_papers_and_citations.md): Literature review & Oxford lineage research establishing the `[70:130]` window.
   - [02_pipeline_blueprint.md](PoC/02_pipeline_blueprint.md): Full mathematical derivations and step-by-step pipeline architecture.
